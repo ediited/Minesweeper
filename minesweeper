@@ -1,7 +1,7 @@
 //by Lauritz Kramberger
 frameRate(2);
 //fuck commenting
-var bombenzahl = 11;
+var bombenzahl = 8;
 var MineField = [
     [1],
     [2]
@@ -462,13 +462,13 @@ for (var i = 0; i < 11; i++) {
              //println(i+"   "+j);
                 }
             }      
-            if(j>0){
+            if(j>0){ //links
                 if (MineField[i][j-1].image === 10){
              MineField[i][j].image += 1;  
              //println(i+"   "+j);
                 }
             }  
-            if(j<9){
+            if(j<9){ //rechts
                 if (MineField[i][j+1].image === 10){
              MineField[i][j].image += 1;  
              //println(i+"   "+j);
@@ -480,15 +480,12 @@ for (var i = 0; i < 11; i++) {
                  //println(i+"   "+j);
                 }   
             
-                
             }
             if(j<10&&i>11){
                 if (MineField[i+1][j+1].image === 10){
                     MineField[i][j].image += 1;  
                  //println(i+"   "+j);
                 }   
-              
-            
             }
             
               if(j<9&&i<10){
@@ -500,6 +497,21 @@ for (var i = 0; i < 11; i++) {
                 
             }
             
+            
+              if(j>0&&i<10){
+                    if (MineField[i+1][j-1].image === 10){
+                    MineField[i][j].image += 1;  
+                 //println(i+"   "+j);
+                }   
+            }
+            
+            
+              if(j<9&&i>0){
+                    if (MineField[i-1][j+1].image === 10){
+                    MineField[i][j].image += 1;  
+                 //println(i+"   "+j);
+                }   
+            }
             
             
             
@@ -556,7 +568,7 @@ MineField[0][3].image = 5;
 */
 
 
-draw = function() {};
+//draw = function() {};
 
 //draw_test_field();
 //i*43+34,j*43+117
