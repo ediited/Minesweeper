@@ -1,6 +1,7 @@
 //by Lauritz Kramberger
 frameRate(2);
 //fuck commenting
+var bombenzahl = 11;
 var MineField = [
     [1],
     [2]
@@ -358,7 +359,7 @@ var MineSquare = function(atx, aty, xi, yi) {
     };
 
     this.isClicked = function(mX, mY, insta, leftcl) {
-        if ((((mX > this.x - 22 && mX < this.x + 22 && mY > this.y - 22 && mY < this.y + 22) || insta) && !this.isOpen)&&leftcl) {
+        if ((((((mX > this.x - 22 && mX < this.x + 22 && mY > this.y - 22 && mY < this.y + 22) || insta) && !this.isOpen)&&leftcl)&&this.image!==11)&&!this.isBomb) {
             this.isOpen = true;
             //println(this.xID+"  "+this.yID);
 
@@ -429,7 +430,89 @@ var MineSquare = function(atx, aty, xi, yi) {
 
     };
 };
-var setup = function(){
+var setup_gen_bombs = function(){
+        var x = round(random(0,9));
+        var y = round(random(0,10));
+        if (!MineField[y][x].isBomb){
+            MineField[y][x].image = 10;
+            MineField[y][x].isBomb = true;
+        }
+        else{setup_gen_bombs();}
+        
+        
+       
+    
+    
+};
+var setup_gen_numbers = function(){
+
+for (var i = 0; i < 11; i++) {
+    for (var j = 0; j < 10; j++) {
+        if(MineField[i][j].image!== 10){
+            //println(i+"   "+j);
+            if(i>0){ //oben
+                if (MineField[i-1][j].image === 10){
+             MineField[i][j].image += 1;  
+             //println(i+"   "+j);
+                }
+            }            
+            if(i<10){ //unten
+                if (MineField[i+1][j].image === 10){
+             MineField[i][j].image += 1;  
+             //println(i+"   "+j);
+                }
+            }      
+            if(j>0){
+                if (MineField[i][j-1].image === 10){
+             MineField[i][j].image += 1;  
+             //println(i+"   "+j);
+                }
+            }  
+            if(j<9){
+                if (MineField[i][j+1].image === 10){
+             MineField[i][j].image += 1;  
+             //println(i+"   "+j);
+                }
+            }       
+            if(j>0&&i>0){
+                    if (MineField[i-1][j-1].image === 10){
+                    MineField[i][j].image += 1;  
+                 //println(i+"   "+j);
+                }   
+            
+                
+            }
+            if(j<10&&i>11){
+                if (MineField[i+1][j+1].image === 10){
+                    MineField[i][j].image += 1;  
+                 //println(i+"   "+j);
+                }   
+              
+            
+            }
+            
+              if(j<9&&i<10){
+                    if (MineField[i+1][j+1].image === 10){
+                    MineField[i][j].image += 1;  
+                 //println(i+"   "+j);
+                }   
+            
+                
+            }
+            
+            
+            
+            
+        
+        
+        
+    
+}}}
+    
+    
+    
+};
+var setup_main = function(){
 for (var i = 0; i < 11; i++) {
     var getAdded = [];
     for (var j = 0; j < 10; j++) {
@@ -441,16 +524,28 @@ for (var i = 0; i < 11; i++) {
 }
 
 
+
 for (var i = 0; i < 11; i++) {
     for (var j = 0; j < 10; j++) {
         MineField[i][j].draw();
     }
 }
+for (var i = 0; i<bombenzahl;i++){
+setup_gen_bombs();
+
+}
+
+setup_gen_numbers();
+
 };
 
 
+
+
 draw_background();
-setup();
+setup_main();
+//draw_test_field();
+//draw_test_field();
 
 /*
 MineField[1][1].image = 5;
