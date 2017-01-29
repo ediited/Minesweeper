@@ -1,9 +1,10 @@
 //by Lauritz Kramberger
 frameRate(1);
 //fuck commenting
+var firstClick = true;
 var isWon = false;
-var bombenzahl = 1;
-var bombenArray = [];
+var bombenzahl = 12;
+bombenzahl-=1;
 var MineField = [
     [1],
     [2]
@@ -412,134 +413,6 @@ var openAllBombs = function(){
   
     
 };
-var MineSquare = function(atx, aty, xi, yi) {
-    this.x = atx;
-    this.y = aty;
-    this.xID = xi;
-    this.yID = yi;
-    this.image = 0;
-    this.oImage = 0;
-    //id:
-    //bomb = 10
-    //flag = 11
-    //all other are the number of bombs next to it
-
-    this.isBomb = false;
-    this.isOpen = false;
-    this.isFlagged = false;
-
-    this.draw = function() {
-        if (this.isOpen||this.image===11) {
-            this.draw_from_id();
-        } else {
-            draw_button_closed(this.x, this.y);
-        }
-    };
-
-    this.isClicked = function(mX, mY, insta, leftcl) {
-        
-        if ((((((mX > this.x - 22 && mX < this.x + 22 && mY > this.y - 22 && mY < this.y + 22) || insta) && !this.isOpen)&&leftcl)&&this.image!==11)&&!this.isBomb) {
-            this.isOpen = true;
-            //println(this.xID+"  "+this.yID);
-
-            if (this.image === 0) {
-
-
-                if (this.yID > 0) {
-                    MineField[this.xID][this.yID - 1].isClicked(mX, mY, true,true);
-                }
-                if (this.yID < 9) {
-                    MineField[this.xID][this.yID + 1].isClicked(mX, mY, true,true);
-                }
-                if (this.xID < 10) {
-                    MineField[this.xID + 1][this.yID].isClicked(mX, mY, true,true);
-                }
-                if (this.xID > 0) {
-                    MineField[this.xID - 1][this.yID].isClicked(mX, mY, true,true);
-                }
-            }
-            
-            else {
-                return;
-            }
-        }
-        
-        else if ((mX > this.x - 22 && mX < this.x + 22 && mY > this.y - 22 && mY < this.y + 22)&&!this.isOpen&&!leftcl){
-         if (this.image === 11){
-          this.image = this.oImage;
-         }
-         else{
-            this.image = 11;
-            
-             }
-            
-        }
-       
-
-        //println("true");
-    };
-    this.bombCheck = function(mX, mY){
-        if(mX > this.x - 22 && mX < this.x + 22 && mY > this.y - 22 && mY < this.y + 22){
-          if (this.image === 10){
-          this.image = 12;
-          this.isOpen = true;
-          openAllBombs();
-          
-          }
-        }
-    };
-
-    this.draw_from_id = function() {
-        switch (this.image) {
-            case 0:
-                draw_button_empty(this.x, this.y);
-                break;
-            case 1:
-                draw_button_one(this.x, this.y);
-                break;
-            case 2:
-                draw_button_two(this.x, this.y);
-                break;
-            case 3:
-                draw_button_three(this.x, this.y);
-                break;
-            case 4:
-                draw_button_four(this.x, this.y);
-                break;
-            case 5:
-                draw_button_five(this.x, this.y);
-                break;
-            case 6:
-                draw_button_six(this.x, this.y);
-                break;
-            case 10:
-                draw_button_bomb(this.x, this.y);
-                break;
-            case 11:
-                draw_button_flag(this.x, this.y);
-                break;
-            case 12: 
-                draw_button_bomb_pressed(this.x,this.y);
-                break;
-        }
-
-    };
-};
-var setup_gen_bombs = function(){
-        var x = round(random(0,9));
-        var y = round(random(0,10));
-        if (!MineField[y][x].isBomb){
-            MineField[y][x].image = 10;
-            MineField[y][x].isBomb = true;
-            bombenArray[bombenArray.length] = MineField[y][x];
-        }
-        else{setup_gen_bombs();}
-        
-        
-       
-    
-    
-};
 var setup_gen_numbers = function(){
 
 for (var i = 0; i < 11; i++) {
@@ -617,9 +490,154 @@ for (var i = 0; i < 11; i++) {
     
 }}}
     
+};
+var setup_gen_bombs = function(){
+        var x = round(random(0,9));
+        var y = round(random(0,10));
+        if (!MineField[y][x].isBomb){
+            MineField[y][x].image = 10;
+            MineField[y][x].isBomb = true;
+        }
+        else{setup_gen_bombs();}
+        
+        
+       
     
     
 };
+var MineSquare = function(atx, aty, xi, yi) {
+    this.x = atx;
+    this.y = aty;
+    this.xID = xi;
+    this.yID = yi;
+    this.image = 0;
+    this.oImage = 0;
+    //id:
+    //bomb = 10
+    //flag = 11
+    //all other are the number of bombs next to it
+
+    this.isBomb = false;
+    this.isOpen = false;
+    this.isFlagged = false;
+
+    this.draw = function() {
+        if (this.isOpen||this.image===11) {
+            this.draw_from_id();
+        } else {
+            draw_button_closed(this.x, this.y);
+        }
+    };
+    this.firstClick = function(mX,mY){
+        if(mX > this.x - 22 && mX < this.x + 22 && mY > this.y - 22 && mY < this.y + 22){
+        setup_gen_bombs();
+        this.isBomb=false;
+        this.image=0;
+        setup_gen_numbers();
+        this.oImage = 0;
+        firstClick = false;
+        
+         for (var i = 0; i < 11; i++) {
+            for (var j = 0; j < 10; j++) {
+                MineField[i][j].oImage= MineField[i][j].image;
+            }
+        }
+        
+        }
+    };
+
+    this.isClicked = function(mX, mY, insta, leftcl) {
+        
+        if ((((((mX > this.x - 22 && mX < this.x + 22 && mY > this.y - 22 && mY < this.y + 22) || insta) && !this.isOpen)&&leftcl)&&this.image!==11)&&!this.isBomb) {
+            this.isOpen = true;
+            //println(this.xID+"  "+this.yID);
+            firstClick = false;
+            if (this.image === 0) {
+
+
+                if (this.yID > 0) {
+                    MineField[this.xID][this.yID - 1].isClicked(mX, mY, true,true);
+                }
+                if (this.yID < 9) {
+                    MineField[this.xID][this.yID + 1].isClicked(mX, mY, true,true);
+                }
+                if (this.xID < 10) {
+                    MineField[this.xID + 1][this.yID].isClicked(mX, mY, true,true);
+                }
+                if (this.xID > 0) {
+                    MineField[this.xID - 1][this.yID].isClicked(mX, mY, true,true);
+                }
+            }
+            
+            else {
+                return;
+            }
+        }
+        
+        else if ((mX > this.x - 22 && mX < this.x + 22 && mY > this.y - 22 && mY < this.y + 22)&&!this.isOpen&&!leftcl){
+         if (this.image === 11){
+          this.image = this.oImage;
+         }
+         else{
+            
+            this.image = 11;
+            
+             }
+            
+        }
+       
+
+        //println("true");
+    };
+    this.bombCheck = function(mX, mY){
+        if(mX > this.x - 22 && mX < this.x + 22 && mY > this.y - 22 && mY < this.y + 22){
+          if (this.image === 10){
+          this.image = 12;
+          this.isOpen = true;
+          openAllBombs();
+          
+          }
+        }
+    };
+
+    this.draw_from_id = function() {
+        switch (this.image) {
+            case 0:
+                draw_button_empty(this.x, this.y);
+                break;
+            case 1:
+                draw_button_one(this.x, this.y);
+                break;
+            case 2:
+                draw_button_two(this.x, this.y);
+                break;
+            case 3:
+                draw_button_three(this.x, this.y);
+                break;
+            case 4:
+                draw_button_four(this.x, this.y);
+                break;
+            case 5:
+                draw_button_five(this.x, this.y);
+                break;
+            case 6:
+                draw_button_six(this.x, this.y);
+                break;
+            case 10:
+                draw_button_bomb(this.x, this.y);
+                break;
+            case 11:
+                draw_button_flag(this.x, this.y);
+                break;
+            case 12: 
+                draw_button_bomb_pressed(this.x,this.y);
+                break;
+        }
+
+    };
+};
+
+
 var setup_main = function(){
 for (var i = 0; i < 11; i++) {
     var getAdded = [];
@@ -643,7 +661,7 @@ setup_gen_bombs();
 
 }
 
-setup_gen_numbers();
+//setup_gen_numbers();
 
 for (var i = 0; i < 11; i++) {
     for (var j = 0; j < 10; j++) {
@@ -655,6 +673,7 @@ for (var i = 0; i < 11; i++) {
 var restart = function(){
 MineField = [];
 isWon = false;
+firstClick = true;
 setup_main();
 };
 var checkWin = function(){
@@ -723,8 +742,12 @@ var mousePressed = function() {
     if (mousePressed && (mouseButton === 37)) {
         //println("left mouse event");
         //ms.isClicked();
+        
         for (var i = 0; i < 11; i++) {
             for (var j = 0; j < 10; j++) {
+                if(firstClick){
+                MineField[i][j].firstClick(mouseX,mouseY);    
+                }
                 MineField[i][j].isClicked(mouseX, mouseY, false, true );
                 MineField[i][j].bombCheck(mouseX,mouseY);
             }
