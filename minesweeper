@@ -1,7 +1,9 @@
 //by Lauritz Kramberger
-frameRate(2);
+frameRate(1);
 //fuck commenting
-var bombenzahl = 8;
+var isWon = false;
+var bombenzahl = 1;
+var bombenArray = [];
 var MineField = [
     [1],
     [2]
@@ -31,6 +33,68 @@ var draw_background = function() {
 
     fill(181, 181, 181);
     rect(16, 18, 463, 51);
+};
+var draw_restart_up = function(atx,aty){
+    
+    noStroke();
+   
+     fill(150, 150, 150);
+    triangle(280+atx,18+aty,280+atx,69+aty,226+atx,69+aty);
+    
+    fill(209, 209, 209);
+    triangle(280+atx,18+aty,226+atx,17+aty,226+atx,69+aty);
+    
+     fill(184, 184, 184);
+    rect(233+atx,23+aty,40,40);
+    
+    stroke(0, 0, 0);
+    strokeWeight(1);
+    fill(255, 242, 0);
+    ellipse(253+atx,44+aty,34,34);
+    ellipse(246+atx,41+aty,2,2);
+    ellipse(259+atx,41+aty,2,2);
+    strokeWeight(2);
+    arc(253+atx,48+aty,17,12,0,180);
+    
+    if(isWon){
+        noStroke();
+    fill(0,0,0);
+    arc(247+atx,39+aty,13,13,0,180);
+    arc(259+atx,39+aty,13,13,0,180);
+    }
+    
+   
+};
+var draw_restart_down = function(atx,aty){
+    
+    noStroke();
+     fill(209, 209, 209);
+    triangle(280+atx,18+aty,280+atx,69+aty,226+atx,69+aty);
+    
+   
+    fill(150, 150, 150);
+    triangle(280+atx,18+aty,226+atx,18+aty,226+atx,69+aty);
+    
+     fill(184, 184, 184);
+    rect(233+atx,23+aty,40,40);
+    
+    stroke(0, 0, 0);
+    strokeWeight(1);
+    fill(255, 242, 0);
+    ellipse(253+atx,44+aty,34,34);
+    ellipse(246+atx,41+aty,2,2);
+    ellipse(259+atx,41+aty,2,2);
+    strokeWeight(2);
+    arc(253+atx,48+aty,17,12,0,180);
+    
+     if(isWon){
+        noStroke();
+    fill(0,0,0);
+    arc(247+atx,39+aty,13,13,0,180);
+    arc(259+atx,39+aty,13,13,0,180);
+    }
+    
+   
 };
 var draw_button_closed = function(atx, aty, size) {
     noStroke();
@@ -335,12 +399,26 @@ var draw_test_field = function() {
     draw_button_five(200, 300);
     draw_button_six(300, 300);
 };
+var openAllBombs = function(){
+  
+  for (var i = 0; i < 11; i++) {
+            for (var j = 0; j < 10; j++) {
+                if(!MineField[i][j].isOpen&&MineField[i][j].isBomb){
+                MineField[i][j].isOpen = true;
+                
+                }
+            }
+        }
+  
+    
+};
 var MineSquare = function(atx, aty, xi, yi) {
     this.x = atx;
     this.y = aty;
     this.xID = xi;
     this.yID = yi;
     this.image = 0;
+    this.oImage = 0;
     //id:
     //bomb = 10
     //flag = 11
@@ -359,6 +437,7 @@ var MineSquare = function(atx, aty, xi, yi) {
     };
 
     this.isClicked = function(mX, mY, insta, leftcl) {
+        
         if ((((((mX > this.x - 22 && mX < this.x + 22 && mY > this.y - 22 && mY < this.y + 22) || insta) && !this.isOpen)&&leftcl)&&this.image!==11)&&!this.isBomb) {
             this.isOpen = true;
             //println(this.xID+"  "+this.yID);
@@ -378,13 +457,16 @@ var MineSquare = function(atx, aty, xi, yi) {
                 if (this.xID > 0) {
                     MineField[this.xID - 1][this.yID].isClicked(mX, mY, true,true);
                 }
-            } else {
+            }
+            
+            else {
                 return;
             }
         }
+        
         else if ((mX > this.x - 22 && mX < this.x + 22 && mY > this.y - 22 && mY < this.y + 22)&&!this.isOpen&&!leftcl){
          if (this.image === 11){
-          this.image = 0;
+          this.image = this.oImage;
          }
          else{
             this.image = 11;
@@ -392,10 +474,20 @@ var MineSquare = function(atx, aty, xi, yi) {
              }
             
         }
+       
 
         //println("true");
     };
-
+    this.bombCheck = function(mX, mY){
+        if(mX > this.x - 22 && mX < this.x + 22 && mY > this.y - 22 && mY < this.y + 22){
+          if (this.image === 10){
+          this.image = 12;
+          this.isOpen = true;
+          openAllBombs();
+          
+          }
+        }
+    };
 
     this.draw_from_id = function() {
         switch (this.image) {
@@ -426,6 +518,9 @@ var MineSquare = function(atx, aty, xi, yi) {
             case 11:
                 draw_button_flag(this.x, this.y);
                 break;
+            case 12: 
+                draw_button_bomb_pressed(this.x,this.y);
+                break;
         }
 
     };
@@ -436,6 +531,7 @@ var setup_gen_bombs = function(){
         if (!MineField[y][x].isBomb){
             MineField[y][x].image = 10;
             MineField[y][x].isBomb = true;
+            bombenArray[bombenArray.length] = MineField[y][x];
         }
         else{setup_gen_bombs();}
         
@@ -549,13 +645,51 @@ setup_gen_bombs();
 
 setup_gen_numbers();
 
+for (var i = 0; i < 11; i++) {
+    for (var j = 0; j < 10; j++) {
+        MineField[i][j].oImage = MineField[i][j].image;
+    }
+}
+
+};
+var restart = function(){
+MineField = [];
+isWon = false;
+setup_main();
+};
+var checkWin = function(){
+    var won = true;
+    
+    for (var i = 0; i < 11; i++) {
+            for (var j = 0; j < 10; j++) {
+                if(MineField[i][j].isOpen === false){
+                   
+                   if(MineField[i][j].isBomb){
+                     if (MineField[i][j].image!==11){
+                        won = false; 
+                     }
+                   }
+                   
+                  else{
+                        if (MineField[i][j].image ===11){
+                    won = false;   
+                        }
+                    }
+                    
+                    
+                }
+                //MineField[i][j].isClicked(mouseX, mouseY, false , false);
+            }
+        }
+        
+    isWon = won;
+    
 };
 
-
-
-
 draw_background();
+draw_restart_up(-4,0);
 setup_main();
+
 //draw_test_field();
 //draw_test_field();
 
@@ -568,9 +702,18 @@ MineField[0][3].image = 5;
 */
 
 
-//draw = function() {};
+draw= function() {
+     //draw_restart_down(-4,0);
+     draw_restart_up(-4,0);
+     if(mouseIsPressed && dist(mouseX,mouseY,249,44)<=25){
+        
+        draw_restart_down(-4,0); 
+        
+        restart();
+     }
+};
 
-//draw_test_field();
+
 //i*43+34,j*43+117
 
 var mousePressed = function() {
@@ -583,6 +726,7 @@ var mousePressed = function() {
         for (var i = 0; i < 11; i++) {
             for (var j = 0; j < 10; j++) {
                 MineField[i][j].isClicked(mouseX, mouseY, false, true );
+                MineField[i][j].bombCheck(mouseX,mouseY);
             }
         }
         for (var i = 0; i < 11; i++) {
@@ -603,6 +747,7 @@ var mousePressed = function() {
                 MineField[i][j].draw();
             }
         }
+        checkWin();
     }
 
 };
