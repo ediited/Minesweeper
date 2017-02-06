@@ -1,15 +1,24 @@
 //by Lauritz Kramberger
 frameRate(1);
 //fuck commenting
+//>fuck me for not commenting
+
+//initial Variables,
 var firstClick = true;
 var isWon = false;
+var isLost = false;
+var time = 0;
 var bombenzahl = 12;
-bombenzahl-=1;
+var score = 1000;
+bombenzahl-=1;  //bug fixed ^^
+
 var MineField = [
     [1],
     [2]
-];
-var draw_background = function() {
+]; //for some reason only works when i initiate it as a matrix array
+//the following 16 functions are just for drawing everything
+//and actually really boring.
+var draw_background = function() { 
     background(181, 181, 181);
     //fill(168, 168, 168);
     noStroke();
@@ -36,7 +45,32 @@ var draw_background = function() {
     rect(16, 18, 463, 51);
 };
 var draw_restart_up = function(atx,aty){
+   
+    if (isLost){
     
+    noStroke();
+   
+     fill(150, 150, 150);
+    triangle(280+atx,18+aty,280+atx,69+aty,226+atx,69+aty);
+    
+    fill(209, 209, 209);
+    triangle(280+atx,18+aty,226+atx,17+aty,226+atx,69+aty);
+    
+     fill(184, 184, 184);
+    rect(233+atx,23+aty,40,40);
+    
+    stroke(0, 0, 0);
+    strokeWeight(1);
+    fill(255, 242, 0);
+    ellipse(253+atx,44+aty,34,34);
+    ellipse(246+atx,41+aty,2,2);
+    ellipse(259+atx,41+aty,2,2);
+    strokeWeight(2);
+    arc(253+atx,53+aty,17,12,-180,0);
+    
+        
+    }
+    else{
     noStroke();
    
      fill(150, 150, 150);
@@ -63,11 +97,37 @@ var draw_restart_up = function(atx,aty){
     arc(247+atx,39+aty,13,13,0,180);
     arc(259+atx,39+aty,13,13,0,180);
     }
-    
+   
+    }
    
 };
 var draw_restart_down = function(atx,aty){
     
+     if (isLost){
+    
+    noStroke();
+   
+     fill(150, 150, 150);
+    triangle(280+atx,18+aty,280+atx,69+aty,226+atx,69+aty);
+    
+    fill(209, 209, 209);
+    triangle(280+atx,18+aty,226+atx,17+aty,226+atx,69+aty);
+    
+     fill(184, 184, 184);
+    rect(233+atx,23+aty,40,40);
+    
+    stroke(0, 0, 0);
+    strokeWeight(1);
+    fill(255, 242, 0);
+    ellipse(253+atx,44+aty,34,34);
+    ellipse(246+atx,41+aty,2,2);
+    ellipse(259+atx,41+aty,2,2);
+    strokeWeight(2);
+    arc(253+atx,53+aty,17,12,-180,0);
+    
+        
+    }
+    else{
     noStroke();
      fill(209, 209, 209);
     triangle(280+atx,18+aty,280+atx,69+aty,226+atx,69+aty);
@@ -95,7 +155,7 @@ var draw_restart_down = function(atx,aty){
     arc(259+atx,39+aty,13,13,0,180);
     }
     
-   
+    }
 };
 var draw_button_closed = function(atx, aty, size) {
     noStroke();
@@ -400,8 +460,31 @@ var draw_test_field = function() {
     draw_button_five(200, 300);
     draw_button_six(300, 300);
 };
+var drawTime = function(atx,aty){
+   noStroke();
+   fill(181, 181, 181);
+   rect(-31+atx,-20+aty,80,40);
+   fill(255, 0, 0);
+   textAlign(CENTER,CENTER);
+   textSize(30);
+    text(time,11+atx,5+aty);
+    
+};
+var drawScore = function(atx,aty){
+   noStroke();
+   fill(181, 181, 181);
+   rect(-40+atx,-20+aty,100,40);
+   fill(255, 0, 0);
+   textAlign(CENTER,CENTER);
+   textSize(30);
+    text(score,11+atx,5+aty);
+};
+
+
+//for when a bomb is clicked, shuts down the game
 var openAllBombs = function(){
-  
+  isLost = true;
+  score=0;
   for (var i = 0; i < 11; i++) {
             for (var j = 0; j < 10; j++) {
                 if(!MineField[i][j].isOpen&&MineField[i][j].isBomb){
@@ -413,6 +496,10 @@ var openAllBombs = function(){
   
     
 };
+
+
+//checks the surrounding fields for bombs and adjusts the number drawn
+//rather inefficiently keeps away from nullpointer Exeptions
 var setup_gen_numbers = function(){
 
 for (var i = 0; i < 11; i++) {
@@ -491,6 +578,8 @@ for (var i = 0; i < 11; i++) {
 }}}
     
 };
+
+//randomly places bombs on the field
 var setup_gen_bombs = function(){
         var x = round(random(0,9));
         var y = round(random(0,10));
@@ -505,6 +594,11 @@ var setup_gen_bombs = function(){
     
     
 };
+
+//the object that makes every square
+//is determined by its image number
+//draws itself based on wether it is flipped up
+//and its image number
 var MineSquare = function(atx, aty, xi, yi) {
     this.x = atx;
     this.y = aty;
@@ -521,6 +615,7 @@ var MineSquare = function(atx, aty, xi, yi) {
     this.isOpen = false;
     this.isFlagged = false;
 
+    //selfdraw
     this.draw = function() {
         if (this.isOpen||this.image===11) {
             this.draw_from_id();
@@ -528,13 +623,14 @@ var MineSquare = function(atx, aty, xi, yi) {
             draw_button_closed(this.x, this.y);
         }
     };
+    //this function makes sure you dont click on a bomb on the first click, and moves the bomb away.
     this.firstClick = function(mX,mY){
         if(mX > this.x - 22 && mX < this.x + 22 && mY > this.y - 22 && mY < this.y + 22){
         setup_gen_bombs();
         this.isBomb=false;
         this.image=0;
         setup_gen_numbers();
-        this.oImage = 0;
+        this.oImage = 0; //zwspeicher des image
         firstClick = false;
         
          for (var i = 0; i < 11; i++) {
@@ -545,7 +641,10 @@ var MineSquare = function(atx, aty, xi, yi) {
         
         }
     };
-
+    
+    
+    //reacts to the click, and reacts accordingly, both to left & right click
+    //including recursive pathfinding for the blank tiles.
     this.isClicked = function(mX, mY, insta, leftcl) {
         
         if ((((((mX > this.x - 22 && mX < this.x + 22 && mY > this.y - 22 && mY < this.y + 22) || insta) && !this.isOpen)&&leftcl)&&this.image!==11)&&!this.isBomb) {
@@ -554,7 +653,7 @@ var MineSquare = function(atx, aty, xi, yi) {
             firstClick = false;
             if (this.image === 0) {
 
-
+                //recursive pathfinding for the blank tiles
                 if (this.yID > 0) {
                     MineField[this.xID][this.yID - 1].isClicked(mX, mY, true,true);
                 }
@@ -589,6 +688,7 @@ var MineSquare = function(atx, aty, xi, yi) {
 
         //println("true");
     };
+    //checks if you just lost.
     this.bombCheck = function(mX, mY){
         if(mX > this.x - 22 && mX < this.x + 22 && mY > this.y - 22 && mY < this.y + 22){
           if (this.image === 10){
@@ -599,7 +699,7 @@ var MineSquare = function(atx, aty, xi, yi) {
           }
         }
     };
-
+    //if its stupid and works it aint stupid
     this.draw_from_id = function() {
         switch (this.image) {
             case 0:
@@ -637,7 +737,7 @@ var MineSquare = function(atx, aty, xi, yi) {
     };
 };
 
-
+//calls all setup function in order
 var setup_main = function(){
 for (var i = 0; i < 11; i++) {
     var getAdded = [];
@@ -670,12 +770,17 @@ for (var i = 0; i < 11; i++) {
 }
 
 };
+//resets all initial values
 var restart = function(){
-MineField = [];
-isWon = false;
-firstClick = true;
-setup_main();
+    MineField = [];
+    isWon = false;
+    score = 1000;
+    time = 0;
+    firstClick = true;
+    isLost = false;
+    setup_main();
 };
+//checks if you have exactly all bombs marked
 var checkWin = function(){
     var won = true;
     
@@ -700,11 +805,14 @@ var checkWin = function(){
                 //MineField[i][j].isClicked(mouseX, mouseY, false , false);
             }
         }
-        
+    
     isWon = won;
+    
     
 };
 
+
+//initial calls
 draw_background();
 draw_restart_up(-4,0);
 setup_main();
@@ -720,9 +828,14 @@ MineField[1][2].image = 5;
 MineField[0][3].image = 5;
 */
 
-
+//draws only the restart button
+//the rest is drawn on call
 draw= function() {
      //draw_restart_down(-4,0);
+     //println(time);
+     if(!isWon&&!isLost){
+     time++;
+     }
      draw_restart_up(-4,0);
      if(mouseIsPressed && dist(mouseX,mouseY,249,44)<=25){
         
@@ -730,15 +843,20 @@ draw= function() {
         
         restart();
      }
+     drawTime(82,39);
+     drawScore(382,39);
+
 };
 
 
 //i*43+34,j*43+117
 
+//mouseListener
 var mousePressed = function() {
     //println(mouseButton);
     //39 = right
     //37 = left
+    score-=10;
     if (mousePressed && (mouseButton === 37)) {
         //println("left mouse event");
         //ms.isClicked();
@@ -771,6 +889,7 @@ var mousePressed = function() {
             }
         }
         checkWin();
+        
     }
 
 };
